@@ -1,5 +1,4 @@
 (function () {
-    // auxiliares
     const $ = (idA, idB) => document.getElementById(idA) || document.getElementById(idB);
     const btn = $("refresh", "refresh-btn");
     const sel = $("days", "days-select");
@@ -27,7 +26,7 @@
 
             // histórico
             const hist = await jget(`/api/history?days=${days}`);
-            drawChart(hist);
+            drawChart(hist, days);
 
             // estatísticas
             const stats = await jget(`/api/stats?days=${days}`);
@@ -45,10 +44,16 @@
 
     // gráfico
     let chart;
-    function drawChart(series) {
+    function drawChart(series, days) {
         const canvas = document.getElementById("chart"); if (!canvas) return;
-        const labels = series.map(p => new Date(p.t).toLocaleDateString());
+        const labels = series.map(p => {
+            const d = new Date(p.t);
+            return days <= 7
+                ? d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
+                : d.toLocaleDateString("pt-BR");
+        });
         const values = series.map(p => p.v);
+
         if (chart) chart.destroy();
         chart = new Chart(canvas.getContext("2d"), {
             type: "line",
@@ -62,7 +67,11 @@
                     borderWidth: 2, tension: .3, fill: true
                 }]
             },
-            options: { responsive: true, plugins: { legend: { display: false } } }
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { x: { ticks: { maxRotation: 0 } } }
+            }
         });
     }
 
