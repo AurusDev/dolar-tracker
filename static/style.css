@@ -131,3 +131,20 @@ footer {
         background-position: 300% 0
     }
 }
+
+/* 🎨 ajustes para o gráfico */
+#chart {
+    max-height: 400px;
+    width: 100%;
+}
+
+.chartjs-render-monitor {
+    font-size: 12px !important;
+    /* ticks menores */
+}
+
+@media(max-width: 600px) {
+    #chart {
+        max-height: 300px;
+    }
+}

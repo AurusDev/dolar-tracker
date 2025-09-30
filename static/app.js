@@ -1,4 +1,5 @@
 (function () {
+    // auxiliares
     const $ = (idA, idB) => document.getElementById(idA) || document.getElementById(idB);
     const btn = $("refresh", "refresh-btn");
     const sel = $("days", "days-select");
@@ -12,7 +13,7 @@
     function setTxt(id, val, suffix = "") {
         const el = document.getElementById(id); if (!el) return;
         el.textContent = (val === null || val === undefined) ? "—"
-            : (typeof val === "number" ? val.toFixed(4) : val) + suffix;
+            : (typeof val === "number" ? val.toFixed(3) : val) + suffix;
     }
 
     async function loadData() {
@@ -22,11 +23,11 @@
             // cotação atual
             const rate = await jget("/api/rate");
             setTxt("price", Number(rate.price));
-            setTxt("last-update", new Date(rate.at).toLocaleString());
+            setTxt("last-update", new Date(rate.at).toLocaleString("pt-BR"));
 
             // histórico
             const hist = await jget(`/api/history?days=${days}`);
-            drawChart(hist, days);
+            drawChart(hist);
 
             // estatísticas
             const stats = await jget(`/api/stats?days=${days}`);
@@ -44,14 +45,13 @@
 
     // gráfico
     let chart;
-    function drawChart(series, days) {
+    function drawChart(series) {
         const canvas = document.getElementById("chart"); if (!canvas) return;
-        const labels = series.map(p => {
-            const d = new Date(p.t);
-            return days <= 7
-                ? d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
-                : d.toLocaleDateString("pt-BR");
-        });
+
+        const labels = series.map(p => new Date(p.t).toLocaleString("pt-BR", {
+            day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+        }));
+
         const values = series.map(p => p.v);
 
         if (chart) chart.destroy();
@@ -70,7 +70,15 @@
             options: {
                 responsive: true,
                 plugins: { legend: { display: false } },
-                scales: { x: { ticks: { maxRotation: 0 } } }
+                scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 8
+                        }
+                    }
+                }
             }
         });
     }
