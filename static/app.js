@@ -1,73 +1,98 @@
-(function () {
-    // auxiliares
-    const $ = (idA, idB) => document.getElementById(idA) || document.getElementById(idB);
-    const btn = $("refresh", "refresh-btn");
-    const sel = $("days", "days-select");
+async function fetchData(days) {
+    const res = await fetch(`/data?days=${days}`);
+    return await res.json();
+}
 
-    async function jget(url) {
-        const r = await fetch(url, { cache: "no-store" });
-        if (!r.ok) throw new Error(`${url} -> ${r.status}`);
-        return r.json();
+function updateUI(data) {
+    if (!data || !data.length) return;
+
+    const last = data[data.length - 1];
+    document.getElementById("price").textContent = last.price.toFixed(4);
+    document.getElementById("timestamp").textContent = new Date(last.timestamp).toLocaleString();
+
+    // Estatísticas
+    const prices = data.map(d => d.price);
+    const sum = prices.reduce((a, b) => a + b, 0);
+    const avg = sum / prices.length;
+
+    document.getElementById("last").textContent = last.price.toFixed(4);
+    document.getElementById("min").textContent = Math.min(...prices).toFixed(4);
+    document.getElementById("max").textContent = Math.max(...prices).toFixed(4);
+    document.getElementById("avg").textContent = avg.toFixed(4);
+
+    if (prices.length >= 7) {
+        const mm7 = prices.slice(-7).reduce((a, b) => a + b, 0) / 7;
+        document.getElementById("mm7").textContent = mm7.toFixed(4);
+    } else {
+        document.getElementById("mm7").textContent = "--";
     }
 
-    function setTxt(id, val, suffix = "") {
-        const el = document.getElementById(id); if (!el) return;
-        el.textContent = (val === null || val === undefined) ? "—"
-            : (typeof val === "number" ? val.toFixed(4) : val) + suffix;
+    const variation = ((last.price - prices[0]) / prices[0]) * 100;
+    document.getElementById("variation").textContent = variation.toFixed(2) + "%";
+
+    // Desenhar gráfico
+    drawChart(data, days);
+}
+
+let chart;
+
+function drawChart(data, days) {
+    const ctx = document.getElementById("chart").getContext("2d");
+
+    const labels = data.map(p => {
+        const d = new Date(p.timestamp);
+        return days <= 7
+            ? d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
+            : d.toLocaleDateString("pt-BR");
+    });
+
+    const prices = data.map(p => p.price);
+
+    if (chart) {
+        chart.destroy();
     }
 
-    async function loadData() {
-        try {
-            const days = sel ? Number(sel.value) : 30;
-
-            // cotação atual
-            const rate = await jget("/api/rate");
-            setTxt("price", Number(rate.price));
-            setTxt("last-update", new Date(rate.at).toLocaleString());
-
-            // histórico
-            const hist = await jget(`/api/history?days=${days}`);
-            drawChart(hist);
-
-            // estatísticas
-            const stats = await jget(`/api/stats?days=${days}`);
-            setTxt("stat-last", stats.last);
-            setTxt("stat-min", stats.min);
-            setTxt("stat-max", stats.max);
-            setTxt("stat-avg", stats.mean);
-            setTxt("stat-mm7", stats.ma7 ?? stats.mm7);
-            setTxt("stat-var", stats.change_pct ?? stats.variation, "%");
-        } catch (e) {
-            console.error(e);
-            setTxt("last-update", "Erro ao carregar dados. Abra o console (F12).");
-        }
-    }
-
-    // gráfico
-    let chart;
-    function drawChart(series) {
-        const canvas = document.getElementById("chart"); if (!canvas) return;
-        const labels = series.map(p => new Date(p.t).toLocaleDateString());
-        const values = series.map(p => p.v);
-        if (chart) chart.destroy();
-        chart = new Chart(canvas.getContext("2d"), {
-            type: "line",
-            data: {
-                labels,
-                datasets: [{
-                    label: "USD/BRL",
-                    data: values,
-                    borderColor: "#14ffec",
-                    backgroundColor: "rgba(20,255,236,.18)",
-                    borderWidth: 2, tension: .3, fill: true
-                }]
+    chart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: prices,
+                borderColor: "#00f5d4",
+                backgroundColor: "rgba(0, 245, 212, 0.2)",
+                fill: true,
+                tension: 0.3,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
             },
-            options: { responsive: true, plugins: { legend: { display: false } } }
-        });
-    }
+            scales: {
+                x: {
+                    ticks: { maxRotation: 0, autoSkip: true }
+                }
+            }
+        }
+    });
+}
 
-    // eventos
-    if (btn) btn.addEventListener("click", loadData);
-    if (sel) sel.addEventListener("change", loadData);
-    document.addEventListener("DOMContentLoaded", loadData);
-})();
+async function refresh(days) {
+    const data = await fetchData(days);
+    updateUI(data);
+}
+
+document.getElementById("refresh").addEventListener("click", () => {
+    const days = document.getElementById("days").value;
+    refresh(days);
+});
+
+document.getElementById("days").addEventListener("change", (e) => {
+    refresh(e.target.value);
+});
+
+// Inicializa com 7 dias
+refresh(7);
