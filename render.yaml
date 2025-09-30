@@ -5,3 +5,14 @@ services:
     plan: free
     dockerfilePath: ./Dockerfile
     autoDeploy: true
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FETCH_INTERVAL_MINUTES
+        value: "30"
+      - key: TIMEZONE
+        value: "America/Sao_Paulo"
+      - key: ASSET_VERSION
+        value: "2"
+      - key: DATABASE_URL
+        value: "postgresql://dolar_tracker_user:kebxCkbCgb5AUKg2YMwSIKq9cgSdThIc@dpg-d3e0m2e3jp1c738voteg-a/dolar_tracker"
