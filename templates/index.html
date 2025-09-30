@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>💵 Dólar Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+    <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+
+<body>
+    <div class="page">
+        <header class="glass card">
+            <div class="title">
+                <span>💵</span>
+                <h1>Dólar Tracker</h1>
+            </div>
+            <div class="actions">
+                <button id="refreshBtn" class="btn primary">🔄 Atualizar</button>
+                <select id="rangeSelect" class="select">
+                    <option value="7">7 dias</option>
+                    <option value="30" selected>30 dias</option>
+                    <option value="90">90 dias</option>
+                </select>
+            </div>
+        </header>
+
+        <main class="grid">
+            <section class="glass card highlight">
+                <h2 class="muted">Cotação agora</h2>
+                <div id="priceNow" class="price">—</div>
+                <div id="priceTime" class="time muted">—</div>
+            </section>
+
+            <section class="glass card">
+                <h2>Histórico</h2>
+                <canvas id="historyChart" height="120"></canvas>
+            </section>
+
+            <section class="glass card">
+                <h2>📊 Análises</h2>
+                <div class="stats">
+                    <div class="stat"><span class="k">Última</span><span id="st_last" class="v">—</span></div>
+                    <div class="stat"><span class="k">Mín</span><span id="st_min" class="v">—</span></div>
+                    <div class="stat"><span class="k">Máx</span><span id="st_max" class="v">—</span></div>
+                    <div class="stat"><span class="k">Média</span><span id="st_mean" class="v">—</span></div>
+                    <div class="stat"><span class="k">MM7</span><span id="st_ma7" class="v">—</span></div>
+                    <div class="stat"><span class="k">Variação</span><span id="st_change" class="v">—</span></div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="muted">
+            <span>Developed by <span class="signature">Arthur Monteiro</span></span>
+        </footer>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">Atualizado!</div>
+</body>
+
+</html>
