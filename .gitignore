@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.egg-info/
+*.egg
+*.manifest
+*.spec
+
+# Ambientes virtuais
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+
+# Configs locais
+*.sqlite3
+*.db
+*.log
+instance/
+.env
+
+# VSCode / IDEs
+.vscode/
+.idea/
+*.swp
+
+# Sistema
+.DS_Store
+Thumbs.db
