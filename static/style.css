@@ -1,82 +1,56 @@
 body {
     font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff;
     margin: 0;
     padding: 0;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: white;
-    display: flex;
-    justify-content: center;
 }
 
-.container {
-    width: 90%;
-    max-width: 1200px;
-    padding: 20px;
-}
-
-.header {
+header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 1rem 2rem;
 }
 
-.controls button,
-.controls select {
-    background: #00695c;
+.controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+button,
+select {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
     border: none;
-    padding: 8px 15px;
-    color: white;
-    border-radius: 8px;
     cursor: pointer;
-    margin-left: 5px;
+}
+
+main {
+    padding: 1rem 2rem;
 }
 
 .card {
     background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    margin: 1rem 0;
     border-radius: 12px;
-    padding: 20px;
-    margin: 15px 0;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.content {
-    display: flex;
-    gap: 20px;
-}
-
-.analysis-grid {
+.grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-}
-
-.analysis-item {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 10px;
-    border-radius: 8px;
-    text-align: center;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
 }
 
 footer {
     text-align: center;
-    margin-top: 20px;
+    padding: 1rem;
 }
 
-.gradient-text {
-    font-weight: bold;
-    background: linear-gradient(90deg, #00f260, #0575e6, #ec38bc);
+.gradient {
+    background: linear-gradient(90deg, #14ffec, #ff14b5);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-size: 200% auto;
-    animation: gradient-flow 3s linear infinite;
-}
-
-@keyframes gradient-flow {
-    0% {
-        background-position: 0%
-    }
-
-    100% {
-        background-position: 200%
-    }
 }
