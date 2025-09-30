@@ -14,10 +14,10 @@ def create_app(*args, **kwargs):
     app = Flask(__name__)
     app.config["SECRET_KEY"] = settings.SECRET_KEY
 
-    # garante que as tabelas existem
+    # cria tabelas
     Base.metadata.create_all(bind=engine)
 
-    # inicia scheduler de captura periódica
+    # inicia scheduler
     start_scheduler()
 
     @app.route("/")
@@ -26,11 +26,11 @@ def create_app(*args, **kwargs):
 
     @app.route("/api/rate", methods=["GET"])
     def api_rate():
-        with SessionLocal() as db:
+        with SessionLocal() as db:  # type: Session
             row = db.execute(select(Rate).order_by(Rate.id.desc())).scalars().first()
             if row:
                 return jsonify({"price": row.price, "at": row.created_at.isoformat()})
-            # sem dados: busca agora e salva
+            # se não houver, busca agora e salva
             price = get_usd_brl_rate()
             db.add(Rate(price=price))
             db.commit()
@@ -38,7 +38,7 @@ def create_app(*args, **kwargs):
 
     @app.route("/api/refresh", methods=["POST"])
     def api_refresh():
-        with SessionLocal() as db:
+        with SessionLocal() as db:  # type: Session
             last = db.execute(select(Rate).order_by(Rate.id.desc())).scalars().first()
             last_val = last.price if last else None
             price = get_usd_brl_rate(fallback=last_val)
@@ -51,22 +51,29 @@ def create_app(*args, **kwargs):
     def api_history():
         days = int(request.args.get("days", "30"))
         with SessionLocal() as db:
-            rows = db.execute(select(Rate).order_by(Rate.created_at.asc())).scalars().all()
+            rows = db.execute(
+                select(Rate).order_by(Rate.created_at.asc())
+            ).scalars().all()
             series = [{"t": r.created_at, "v": r.price} for r in rows]
             series = slice_last_days(series, days)
-            return jsonify([{"t": p["t"].isoformat(), "v": p["v"]} for p in series])
+            return jsonify(
+                [{"t": p["t"].isoformat(), "v": p["v"]} for p in series]
+            )
 
     @app.route("/api/stats", methods=["GET"])
     def api_stats():
         days = int(request.args.get("days", "30"))
         with SessionLocal() as db:
-            rows = db.execute(select(Rate).order_by(Rate.created_at.asc())).scalars().all()
+            rows = db.execute(
+                select(Rate).order_by(Rate.created_at.asc())
+            ).scalars().all()
             series = [{"t": r.created_at, "v": r.price} for r in rows]
             series = slice_last_days(series, days)
             return jsonify(compute_stats(series))
 
     @app.route("/api/health", methods=["GET"])
     def api_health():
+        # simples healthcheck
         with SessionLocal() as db:
             count = db.execute(select(func.count(Rate.id))).scalar_one()
         return jsonify({"ok": True, "rows": count})
@@ -74,7 +81,8 @@ def create_app(*args, **kwargs):
     return app
 
 
+# cria instância global do Flask (necessário para Gunicorn sem --factory)
+app = create_app()
+
 if __name__ == "__main__":
-    # para rodar local
-    app = create_app()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True)

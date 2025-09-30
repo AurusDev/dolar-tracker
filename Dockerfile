@@ -1,13 +1,18 @@
-# Python 3.11 (garantido)
+# Usa Python slim
 FROM python:3.11-slim
 
+# Define diretório de trabalho
 WORKDIR /app
-COPY . /app
 
-# Dependências
-RUN pip install --upgrade pip
+# Copia dependências
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Inicia Gunicorn usando a Factory do Flask
-# Usa a variável $PORT do Render (ou 8000 localmente)
-CMD ["sh", "-c", "gunicorn --factory app:create_app --bind 0.0.0.0:${PORT:-8000} --workers 2"]
+# Copia código
+COPY . .
+
+# Expõe a porta
+EXPOSE 8000
+
+# Start do servidor
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:${PORT}", "--workers", "4"]
