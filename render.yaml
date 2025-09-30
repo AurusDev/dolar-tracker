@@ -2,6 +2,7 @@ services:
   - type: web
     name: dolar-tracker
     env: python
+    pythonVersion: 3.11.9 # 👈 força o runtime direto no YAML
     plan: free
     region: oregon
     buildCommand: "pip install -r requirements.txt"
@@ -14,6 +15,5 @@ services:
         value: "30"
       - key: TIMEZONE
         value: "America/Sao_Paulo"
-      # Use o banco já existente
       - key: DATABASE_URL
         value: "postgresql://dolar_tracker_user:kebxCkbCgb5AUKg2YMwSIKq9cgSdThIc@dpg-d3e0m2e3jp1c738voteg-a/dolar_tracker"
