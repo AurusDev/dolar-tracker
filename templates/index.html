@@ -2,21 +2,20 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dólar Tracker</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ asset_version }}">
 </head>
 
 <body>
     <div class="container">
-        <header>
+        <header class="header">
             <h1>💵 Dólar Tracker</h1>
             <div class="controls">
-                <button id="refresh">🔄 Atualizar</button>
-                <select id="days">
+                <button id="refresh" class="btn">🔄 Atualizar</button>
+                <select id="days" class="select">
                     <option value="7">7 dias</option>
                     <option value="30">30 dias</option>
                     <option value="90">90 dias</option>
@@ -24,43 +23,38 @@
             </div>
         </header>
 
-        <main>
-            <!-- Cotação atual -->
-            <section class="card">
-                <h2>Cotação agora</h2>
-                <p id="price">--</p>
-                <p id="timestamp">--</p>
+        <section class="card now">
+            <h2>Cotação agora</h2>
+            <div id="price" class="big">--</div>
+            <div id="last-update" class="timestamp">--</div>
+        </section>
+
+        <main class="grid">
+            <section class="card history">
+                <h2>📈 Histórico</h2>
+                <canvas id="chart"></canvas>
             </section>
 
-            <!-- Histórico e Análises lado a lado -->
-            <section class="grid">
-                <!-- Card do Gráfico -->
-                <div class="card">
-                    <h2>📈 Histórico</h2>
-                    <canvas id="chart"></canvas>
-                </div>
-
-                <!-- Card de Análises -->
-                <div class="card">
-                    <h2>📊 Análises</h2>
-                    <div class="stats">
-                        <p><strong>Última:</strong> <span id="last">--</span></p>
-                        <p><strong>Mín:</strong> <span id="min">--</span></p>
-                        <p><strong>Máx:</strong> <span id="max">--</span></p>
-                        <p><strong>Média:</strong> <span id="avg">--</span></p>
-                        <p><strong>MM7:</strong> <span id="mm7">--</span></p>
-                        <p><strong>Variação:</strong> <span id="variation">--</span></p>
-                    </div>
+            <section class="card stats">
+                <h2>📊 Análises</h2>
+                <div class="stats-grid">
+                    <div class="pill"><b>Última:</b> <span id="stat-last">--</span></div>
+                    <div class="pill"><b>Mín:</b> <span id="stat-min">--</span></div>
+                    <div class="pill"><b>Máx:</b> <span id="stat-max">--</span></div>
+                    <div class="pill"><b>Média:</b> <span id="stat-avg">--</span></div>
+                    <div class="pill"><b>MM7:</b> <span id="stat-mm7">--</span></div>
+                    <div class="pill"><b>Variação:</b> <span id="stat-var">--</span></div>
                 </div>
             </section>
         </main>
 
         <footer>
-            <p>Developed by <span class="gradient-text">Arthur Monteiro</span></p>
+            Developed by <span class="gradient-text">Arthur Monteiro</span>
         </footer>
     </div>
 
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v={{ asset_version }}"></script>
 </body>
 
 </html>
