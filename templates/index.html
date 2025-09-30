@@ -3,67 +3,54 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dólar Tracker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-    <div class="container">
-        <header class="card header">
-            <h1>💵 <b>Dólar Tracker</b></h1>
-            <div class="controls">
-                <!-- Botão com ID correto -->
-                <button id="refresh-btn" class="btn">🔄 Atualizar</button>
-                <select id="days-select" class="select">
-                    <option value="7">7 dias</option>
-                    <option value="30" selected>30 dias</option>
-                    <option value="90">90 dias</option>
-                </select>
-            </div>
-        </header>
+    <header>
+        <h1>💵 Dólar Tracker</h1>
+        <div class="controls">
+            <button id="refresh">🔄 Atualizar</button>
+            <select id="days-select">
+                <option value="7">7 dias</option>
+                <option value="30">30 dias</option>
+                <option value="90">90 dias</option>
+            </select>
+        </div>
+    </header>
 
-        <section class="card now">
+    <main>
+        <section class="card">
             <h2>Cotação agora</h2>
-            <div id="current-rate" class="big">R$ --</div>
-            <div id="last-updated" class="timestamp">--</div>
+            <p id="current-price">--</p>
+            <span id="last-update">--</span>
         </section>
 
-        <main class="grid">
-            <section class="card history">
+        <section class="grid">
+            <div class="card">
                 <h2>Histórico</h2>
                 <canvas id="history-chart"></canvas>
-            </section>
-
-            <section class="card stats">
+            </div>
+            <div class="card">
                 <h2>📊 Análises</h2>
-                <div class="stats-grid">
-                    <div><b>Última</b>
-                        <div id="stat-last">—</div>
-                    </div>
-                    <div><b>Mín</b>
-                        <div id="stat-min">—</div>
-                    </div>
-                    <div><b>Máx</b>
-                        <div id="stat-max">—</div>
-                    </div>
-                    <div><b>Média</b>
-                        <div id="stat-avg">—</div>
-                    </div>
-                    <div><b>MM7</b>
-                        <div id="stat-mm7">—</div>
-                    </div>
-                    <div><b>Variação</b>
-                        <div id="stat-var">—</div>
-                    </div>
-                </div>
-            </section>
-        </main>
+                <ul id="stats">
+                    <li><strong>Última:</strong> <span id="last">--</span></li>
+                    <li><strong>Mín:</strong> <span id="min">--</span></li>
+                    <li><strong>Máx:</strong> <span id="max">--</span></li>
+                    <li><strong>Média:</strong> <span id="mean">--</span></li>
+                    <li><strong>MM7:</strong> <span id="mm7">--</span></li>
+                    <li><strong>Variação:</strong> <span id="variation">--</span></li>
+                </ul>
+            </div>
+        </section>
+    </main>
 
-        <footer>
-            Developed by <b>Arthur Monteiro</b>
-        </footer>
-    </div>
+    <footer>
+        <p>Developed by <span class="gradient">Arthur Monteiro</span></p>
+    </footer>
 
     <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>

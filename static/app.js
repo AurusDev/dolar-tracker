@@ -1,69 +1,70 @@
-async function loadData() {
-    const days = document.getElementById("days-select").value;
-
-    try {
-        // Cotação atual
-        const rateRes = await fetch("/api/rate");
-        const rate = await rateRes.json();
-        document.getElementById("current-rate").textContent =
-            "R$ " + rate.price.toFixed(4);
-        document.getElementById("last-updated").textContent =
-            new Date(rate.at).toLocaleString();
-
-        // Histórico
-        const historyRes = await fetch(`/api/history?days=${days}`);
-        const history = await historyRes.json();
-        renderChart(history);
-
-        // Estatísticas
-        const statsRes = await fetch(`/api/stats?days=${days}`);
-        const stats = await statsRes.json();
-        updateStats(stats);
-
-    } catch (err) {
-        console.error("Erro ao carregar dados:", err);
-    }
+async function fetchRate() {
+    const res = await fetch("/api/rate");
+    return res.json();
 }
 
-function renderChart(history) {
+async function fetchHistory(days) {
+    const res = await fetch(`/api/history?days=${days}`);
+    return res.json();
+}
+
+async function fetchStats(days) {
+    const res = await fetch(`/api/stats?days=${days}`);
+    return res.json();
+}
+
+async function refresh() {
+    const days = document.getElementById("days-select").value;
+
+    // Cotação atual
+    const rate = await fetchRate();
+    document.getElementById("current-price").textContent =
+        `R$ ${rate.price.toFixed(4)}`;
+    document.getElementById("last-update").textContent =
+        new Date(rate.at).toLocaleString();
+
+    // Histórico
+    const history = await fetchHistory(days);
+    updateChart(history);
+
+    // Estatísticas
+    const stats = await fetchStats(days);
+    document.getElementById("last").textContent = stats.last?.toFixed(4) || "--";
+    document.getElementById("min").textContent = stats.min?.toFixed(4) || "--";
+    document.getElementById("max").textContent = stats.max?.toFixed(4) || "--";
+    document.getElementById("mean").textContent = stats.mean?.toFixed(4) || "--";
+    document.getElementById("mm7").textContent = stats.mm7?.toFixed(4) || "--";
+    document.getElementById("variation").textContent =
+        stats.variation?.toFixed(4) || "--";
+}
+
+// Gráfico
+let chart;
+function updateChart(data) {
     const ctx = document.getElementById("history-chart").getContext("2d");
-    if (window.historyChart) {
-        window.historyChart.destroy();
-    }
-    window.historyChart = new Chart(ctx, {
+    const labels = data.map(d => new Date(d.t).toLocaleDateString());
+    const values = data.map(d => d.v);
+
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
         type: "line",
         data: {
-            labels: history.map((p) => new Date(p.t).toLocaleDateString()),
+            labels,
             datasets: [{
                 label: "USD/BRL",
-                data: history.map((p) => p.v),
-                borderColor: "#4bc0c0",
+                data: values,
+                borderColor: "#14ffec",
+                backgroundColor: "rgba(20, 255, 236, 0.2)",
                 tension: 0.3,
-                fill: false
+                fill: true
             }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } }
         }
     });
 }
 
-function updateStats(stats) {
-    document.getElementById("stat-last").textContent = stats.last?.toFixed(4) ?? "—";
-    document.getElementById("stat-min").textContent = stats.min?.toFixed(4) ?? "—";
-    document.getElementById("stat-max").textContent = stats.max?.toFixed(4) ?? "—";
-    document.getElementById("stat-avg").textContent = stats.mean?.toFixed(4) ?? "—";
-    document.getElementById("stat-mm7").textContent = stats.mm7?.toFixed(4) ?? "—";
-    document.getElementById("stat-var").textContent =
-        stats.var_pct != null ? stats.var_pct.toFixed(2) + "%" : "—";
-}
-
 // Eventos
-document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("refresh-btn").addEventListener("click", loadData);
-    document.getElementById("days-select").addEventListener("change", loadData);
+document.getElementById("refresh").addEventListener("click", refresh);
+document.getElementById("days-select").addEventListener("change", refresh);
 
-    // Carrega ao iniciar
-    loadData();
-});
+// Inicializa
+refresh();
