@@ -1,0 +1,36 @@
+# Ignorar ambiente virtual local
+.venv
+env
+venv
+
+# Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Cache e metadados do pacote
+*.egg-info
+.eggs/
+*.egg
+
+# Logs
+*.log
+
+# Banco local (não precisamos enviar para o container)
+*.db
+
+# Configuração local
+.env
+.env.*
+
+# Git
+.git
+.gitignore
+
+# IDEs e editores
+.vscode
+.idea
+*.swp
+*.swo
+*.bak
