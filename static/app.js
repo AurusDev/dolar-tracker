@@ -1,85 +1,69 @@
-let chart;
+async function loadData() {
+    const days = document.getElementById("days-select").value;
 
-function fmt(v) { return v != null ? "R$ " + v.toFixed(4) : "—"; }
-function pct(v) { return v != null ? v.toFixed(2) + "%" : "—"; }
-function timefmt(iso) { try { return new Date(iso).toLocaleString(); } catch { return "—"; } }
+    try {
+        // Cotação atual
+        const rateRes = await fetch("/api/rate");
+        const rate = await rateRes.json();
+        document.getElementById("current-rate").textContent =
+            "R$ " + rate.price.toFixed(4);
+        document.getElementById("last-updated").textContent =
+            new Date(rate.at).toLocaleString();
 
-async function getJSON(url) {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    return r.json();
+        // Histórico
+        const historyRes = await fetch(`/api/history?days=${days}`);
+        const history = await historyRes.json();
+        renderChart(history);
+
+        // Estatísticas
+        const statsRes = await fetch(`/api/stats?days=${days}`);
+        const stats = await statsRes.json();
+        updateStats(stats);
+
+    } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+    }
 }
 
-async function refreshNow(showToast = false) {
-    const r = await fetch("/api/refresh", { method: "POST" });
-    if (!r.ok) return;
-    const data = await r.json();
-    document.getElementById("priceNow").textContent = fmt(data.price);
-    // atualiza timestamp atual via /api/rate
-    const rate = await getJSON("/api/rate");
-    document.getElementById("priceTime").textContent = timefmt(rate.at);
-    if (showToast) toast("Atualizado!");
-    await reloadSeries();
-}
-
-async function loadNow() {
-    const rate = await getJSON("/api/rate");
-    document.getElementById("priceNow").textContent = fmt(rate.price);
-    document.getElementById("priceTime").textContent = timefmt(rate.at);
-}
-
-async function reloadSeries() {
-    const range = document.getElementById("rangeSelect").value;
-    const series = await getJSON(`/api/history?days=${range}`);
-    const stats = await getJSON(`/api/stats?days=${range}`);
-
-    // gráfico
-    const labels = series.map(p => new Date(p.t));
-    const values = series.map(p => p.v);
-
-    const ctx = document.getElementById("historyChart").getContext("2d");
-    if (chart) { chart.destroy(); }
-    chart = new Chart(ctx, {
-        type: 'line',
+function renderChart(history) {
+    const ctx = document.getElementById("history-chart").getContext("2d");
+    if (window.historyChart) {
+        window.historyChart.destroy();
+    }
+    window.historyChart = new Chart(ctx, {
+        type: "line",
         data: {
-            labels,
-            datasets: [
-                { label: 'USD/BRL', data: values, tension: .25, pointRadius: 0 },
-            ]
+            labels: history.map((p) => new Date(p.t).toLocaleDateString()),
+            datasets: [{
+                label: "USD/BRL",
+                data: history.map((p) => p.v),
+                borderColor: "#4bc0c0",
+                tension: 0.3,
+                fill: false
+            }]
         },
         options: {
             responsive: true,
-            scales: {
-                x: { type: 'time', time: { unit: 'day' } },
-                y: { beginAtZero: false }
-            },
-            plugins: {
-                legend: { display: false },
-                tooltip: { mode: 'index', intersect: false }
-            }
+            plugins: { legend: { display: false } }
         }
     });
-
-    // stats
-    document.getElementById("st_last").textContent = fmt(stats.last);
-    document.getElementById("st_min").textContent = fmt(stats.min);
-    document.getElementById("st_max").textContent = fmt(stats.max);
-    document.getElementById("st_mean").textContent = fmt(stats.mean);
-    document.getElementById("st_ma7").textContent = fmt(stats.ma7);
-    document.getElementById("st_change").textContent = stats.change_pct != null ? pct(stats.change_pct) : "—";
 }
 
-function toast(msg) {
-    const t = document.getElementById("toast");
-    t.textContent = msg;
-    t.classList.add("show");
-    setTimeout(() => t.classList.remove("show"), 1800);
+function updateStats(stats) {
+    document.getElementById("stat-last").textContent = stats.last?.toFixed(4) ?? "—";
+    document.getElementById("stat-min").textContent = stats.min?.toFixed(4) ?? "—";
+    document.getElementById("stat-max").textContent = stats.max?.toFixed(4) ?? "—";
+    document.getElementById("stat-avg").textContent = stats.mean?.toFixed(4) ?? "—";
+    document.getElementById("stat-mm7").textContent = stats.mm7?.toFixed(4) ?? "—";
+    document.getElementById("stat-var").textContent =
+        stats.var_pct != null ? stats.var_pct.toFixed(2) + "%" : "—";
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-    document.getElementById("refreshBtn").addEventListener("click", () => refreshNow(true));
-    document.getElementById("rangeSelect").addEventListener("change", reloadSeries);
+// Eventos
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("refresh-btn").addEventListener("click", loadData);
+    document.getElementById("days-select").addEventListener("change", loadData);
 
-    await loadNow();
-    await reloadSeries();
+    // Carrega ao iniciar
+    loadData();
 });
