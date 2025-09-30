@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: dolar-tracker
+    env: python
+    plan: free
+    region: oregon
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:create_app --bind 0.0.0.0:$PORT --workers 4"
+    runtime: python-3.11.9
+    autoDeploy: true
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FETCH_INTERVAL_MINUTES
+        value: "30"
+      - key: TIMEZONE
+        value: "America/Sao_Paulo"
+      - key: DATABASE_URL
+        value: "postgresql://dolar_tracker_user:kebxCkbCgb5AUKg2YMwSIKq9cgSdThIc@dpg-d3e0m2e3jp1c738voteg-a/dolar_tracker"
+      #   fromDatabase:
+      #     name: dolar-tracker-db
+      #     property: connectionString
+
+databases:
+  - name: dolar-tracker-db
+    plan: free
