@@ -15,4 +15,5 @@ COPY . .
 EXPOSE 8000
 
 # Start do servidor
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:${PORT}", "--workers", "4"]
+CMD ["sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT} --workers 4"]
+
